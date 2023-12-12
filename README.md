@@ -1,0 +1,1 @@
+Jogo desenvolvido por um minicurso que visa habilitar adolescentes para a programação de jogos de computadores utilizando a linguagem de programação Python de forma lúdica e atrativa, por meio do desenvolvimento de jogos com o módulo Pygame. 
