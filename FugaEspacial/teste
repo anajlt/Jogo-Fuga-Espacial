@@ -1,0 +1,345 @@
+"""
+Jogo: Fuga Espacial
+Descrição: Um grupo de diplomatas escapam de uma fortaleza estelar a bordo de uma nave danificada.
+    A nave precisa se desviar das ameaças e sobreviver até atingir a zona de segurança diplomática.
+"""
+
+import pygame
+import time # uso da função-membro time.sleep(...) in loop
+import random
+import os # usa função-membro os.pathisfile(...) em play_soundtrack
+import sys # classe Soundtrack
+
+class Background:
+    """
+    Esta classe define o Plano de Fundo do jogo
+    """
+    image = None
+    margin_left = None
+    margin_right = None
+
+    def __init__(self):
+
+        background_fig = pygame.image.load("Images/background.png")
+        background_fig.convert()
+        background_fig = pygame.transform.scale(background_fig, (800, 602))
+        self.image = background_fig
+
+        margin_left_fig = pygame.image.load("Images/margin_1.png")
+        margin_left_fig.convert()
+        margin_left_fig = pygame.transform.scale(margin_left_fig, (60, 602))
+        self.margin_left = margin_left_fig
+
+        margin_right_fig = pygame.image.load("Images/margin_2.png")
+        margin_right_fig.convert()
+        margin_right_fig = pygame.transform.scale(margin_right_fig, (60, 602))
+        self.margin_right = margin_right_fig
+
+    def update(self, dt):
+        pass # Ainda não faz nada
+    # update()
+
+    def draw(self, screen):
+        screen.blit(self.image, (0, 0))
+        screen.blit(self.margin_left, (0,0)) # 60 depois da primeira margem
+        screen.blit(self.margin_right, (740, 0))  # 60 antes da segunda margem
+    # draw()
+
+    # Define posições do Plano de Fundo para criar o movimento
+    def move(self, screen, scr_height, movL_x, movL_y, movR_x, movR_y):
+
+        for i in range(0, 2):
+            screen.blit(self.image, (movL_x, movL_y - i * scr_height))
+            screen.blit(self.margin_left, (movL_x, movL_y - i * scr_height))
+            screen.blit(self.margin_right, (movR_x, movR_y - i * scr_height))
+
+    # move
+# Background
+
+class Player:
+    """
+    Esta classe define Jogador
+    """
+    image= None
+    x = None
+    y = None
+
+    def __init__(self, x, y):
+        player_fig = pygame.image.load("Images/player.png")
+        player_fig.convert()
+        player_fig = pygame.transform.scale(player_fig, (90, 90))
+        self.image = player_fig
+        self.x = x
+        self.y = y
+
+    # __init__()
+
+    # Desenhar Player
+    def draw (self, screen, x, y):
+        screen.blit(self.image, (x,y))
+
+# Player
+
+class Hazard:
+    """
+    Esta classe define ameaça ao Jogador
+    """
+    image = None
+    x = None
+    y = None
+
+    def __init__(self, img, x, y):
+        hazard_fig = pygame.image.load(img)
+        hazard_fig.convert()
+        hazard_fig = pygame.transform.scale(hazard_fig, (130, 130))
+        self.image = hazard_fig
+        self.x = x
+        self.y = y
+    # __init__()
+    # Desenhar Hazard
+    def draw (self, screen, x, y):
+        screen.blit(self.image, (x,y))
+    # draw()
+
+# Hazard:
+
+class Soundtrack:
+    soundtrack = None
+    sound = None
+
+    def __init__(self, soundtrack):
+        if os.path.isfile(soundtrack):
+            self.soundtrack = soundtrack
+        else:
+            print(soundtrack + "not found... ignoring", file=sys.stderr)
+    # __init__()
+
+    def play(self):
+        pygame.mixer.music.load(self.soundtrack)
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(loops=-1)  # set loops to -1 to loop the music indefinitely
+    # play
+
+    def play_sound(self, sound):
+        # Som
+        if os.path.isfile(sound):
+            self.sound = sound
+            pygame.mixer.music.load(self.sound)
+            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.play()
+        else:
+            print(sound + " file not found... ignoring", file=sys.stderr)
+    # play_sound
+# Soundtrack:
+
+class Game:
+    screen = None
+    screen_size = None
+    width = 800
+    height = 600
+    run = True
+    background = None
+    player = None
+    hazard = []
+    render_text_bateulateral = None
+    render_text_perdeu = None
+
+    # movimento do Player
+    #DIREITA = pygame.K_RIGHT
+    #ESQUERDA = pygame.K_LEFT
+    mudar_x = 0.0
+
+    def __init__(self, size, fullscreen):
+        """
+        Função que inicializa o pygame, define a resolução da tela,
+        caption e desabilita o mouse
+        """
+        pygame.init()
+
+        self.screen = pygame.display.set_mode((self.width, self.height)) #tamanho da tela
+        self.screen_size = self.screen.get_size()
+
+        pygame.mouse.set_visible(0)
+        pygame.display.set_caption('Fuga Espacial')
+
+        # define as fontes
+        my_font = pygame.font.Font("Fonts/Fonte4.ttf", 100)
+
+        # Mensagens para o jogador
+        self.render_text_bateulateral = my_font.render("VOCÊ BATEU!", 0,(255, 255, 255)) # ("texto", opaco/transparencia)
+        self.render_text_perdeu = my_font.render("GAME OVER!", 0, (255, 0, 0)) # ("texto", opaco/transparencia)
+    # init()
+
+    def handle_events(self):
+        """
+        Trata o evento e toma a ação necessária
+        """
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                self.run = False
+
+            # se clicar em qualquer seta, entra no if
+            if event.type == pygame.KEYDOWN:
+                # se clicar na seta da esquerda, anda 3 para a esquerda no eixo x
+                if event.key == pygame.K_LEFT:
+                    self.mudar_x = -3
+                # se clicar na seta da direita, anda 3 para a direita no eixo x
+                if event.key == pygame.K_RIGHT:
+                    self.mudar_x = 3
+
+            # se soltar qualquer tecla, não faz nada
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                    self.mudar_x = 0
+# handle_events()
+
+    def elements_update(self, dt):
+        self.background.update(dt)
+    # elements_update()
+
+    def elements_draw(self):
+        self.background.draw(self.screen)
+    # elements_draw()
+
+    # Informa a quantidade de hazard que passaram e a pontuação
+    def score_card(self, screen, h_passou, score):
+        font = pygame.font.SysFont(None, 35)
+        passou = font.render("Passou: " + str(h_passou), True, (255, 255, 128))
+        score = font.render("Score: " + str(score), True, (253, 231, 32))
+        screen.blit(passou, (0, 50))
+        screen.blit(score, (0, 100))
+    #score_card
+
+
+    def loop(self):
+        """
+        Laço principal
+        """
+        score = 0
+        h_passou = 0
+        # variáveis para movimento de plano de fundo/Background
+        velocidade_background = 10
+        velocidade_hazard = 10
+
+        hzrd = 0
+        h_x = random.randrange(125, 660)
+        h_y = -500
+
+        # Info Hazard
+        h_width = 100
+        h_height = 110
+
+        # movimento de margem esquerda
+        movL_x = 0
+        movL_y = 0
+
+        # movimento da margem direita
+        movR_x = 740
+        movR_y = 0
+
+        # Criar o plano de fundo
+        self.background = Background()
+
+
+        # Posição do Player
+        x = (self.width - 56) / 2
+        y = self.height - 125
+
+        # Criar o Player
+        self.player = Player(x, y)
+
+        # Criar os Hazards
+        self.hazard.append(Hazard("Images/satelite.png", h_x, h_y))
+        self.hazard.append(Hazard("Images/nave.png", h_x, h_y))
+        self.hazard.append(Hazard("Images/cometaVermelho.png", h_x, h_y))
+        self.hazard.append(Hazard("Images/meteoros.png", h_x, h_y))
+        self.hazard.append(Hazard("Images/buracoNegro.png", h_x, h_y))
+
+        # Criar trilha sonora
+        self.soundtrack = Soundtrack('Sounds/song.wav')
+        self.soundtrack.play()
+
+        # Incluir trilha sonora
+        self.soundtrack.play()
+
+        # Inicializas o relógio e o dt que vai limitar o valor de FPS (frames por segundo) do jogo
+        clock = pygame.time.Clock()
+        dt = 16
+
+        # Início do loop principal do programa
+        while self.run:
+            clock.tick(1000 / dt)
+
+            # Handle Input Events
+            self.handle_events()
+
+            # Atualiza Elementos
+            self.elements_update(dt)
+
+            # Desenha o background buffer
+            self.elements_draw()
+
+            # adiciona movimento ao background
+            self.background.move(self.screen, self.height, movL_x, movL_y, movR_x, movR_y)
+            movL_y = movL_y + velocidade_background
+            movR_y = movR_y + velocidade_background
+
+            # se a imagem ultrapassar a extremidade da tela, move de volta
+            if movL_y > 600 and movR_y > 600:
+                movL_y -= 600
+                movR_y -= 600
+
+            # Movimentação do Player
+            # Altera a coordenada x da nave de acordo com as mudanças no event_handle() para ela se mover
+            x = x + self.mudar_x
+
+            # Desenhar Player
+            self.player.draw(self.screen, x, y)
+
+            # Mostrar score
+            self.score_card(self.screen, h_passou, score)
+
+            # Restrições do movimento do Player
+            # Se o Player bate na lateral não é Game over
+            if x > 760 - 92 or x < 40 + 5:
+                self.screen.blit(self.render_text_bateulateral, (80, 200))
+                pygame.display.update() # atualizar a tela
+                time.sleep(3)
+                self.loop()
+                self.run = False
+
+                # Som da colisão nas margens
+                self.play_sound('Sounds/jump2.wav')
+
+                # Exibe mensagem
+                self.screen.blit(self.render_text_bateulateral, (80, 200))
+                pygame.display.update() # atualiza a tela
+                time.sleep(3)
+                self.loop()
+
+            # adicionando movimento ao hazard
+            h_y = h_y + velocidade_hazard / 4
+            self.hazard[hzrd].draw(self.screen, h_x, h_y)
+            h_y = h_y + velocidade_hazard
+
+            # definindo onde o hazard vai aparecer, recomeçando a posição do obstáculo e da faixa
+            if h_y > self.height:
+                h_y = 0 - h_height
+                h_x = random.randrange(125, 650 - h_height)
+                hzrd = random.randint(0, 4)
+                # determinando quantos hazard passaram e a pontuação
+                h_passou = h_passou + 1
+                score = h_passou * 10
+
+            # Atualiza a tela
+            pygame.display.update()
+            clock.tick(1000/dt)
+        # while self.run
+
+    # Inicia o jogo: Cria o objeto game e chama o loop básico
+
+game = Game('resolution', 'fullscreen')
+game.loop()
+    # loop()
+    # Game
