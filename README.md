@@ -1,14 +1,14 @@
-# Fuga Espacial
+# 🛸 Fuga Espacial
 
-🌕 Jogo de temática espacial, desenvolvido durante o curso **Programação de Jogos em Python** da AEB Escola (Agência Espacial Brasileira).
+• Jogo de temática espacial, desenvolvido durante o curso **Programação de Jogos em Python** da AEB Escola (Agência Espacial Brasileira).
 
-🛸 O jogo foi criado com **Python** e **Pygame**.
+• O jogo foi criado com **Python** e **Pygame**.
 
-## Descrição
+## 📋 Descrição
 
 Um grupo de diplomatas foge de uma fortaleza estelar a bordo de uma nave danificada. A nave precisa desviar das ameaças e sobreviver até chegar à zona de segurança diplomática.
 
-## Funcionalidades
+## 🔧 Funcionalidades
 
 - Controle da nave com as setas do teclado (esquerda e direita)
 - Obstáculos variados que caem pelo cenário
@@ -17,7 +17,7 @@ Um grupo de diplomatas foge de uma fortaleza estelar a bordo de uma nave danific
 - Mensagens de Game Over e Vitória
 - Gráficos animados com fundo em movimento
 
-## Como Jogar
+## 🕹️ Como Jogar
 
 1. Clone este repositório ou baixe o código-fonte.
 2. Acesse a pasta do projeto.
@@ -27,7 +27,7 @@ Um grupo de diplomatas foge de uma fortaleza estelar a bordo de uma nave danific
 python main.py
 ```
 
-## Pré-requisitos
+## 📌 Pré-requisitos
 
 Verifique se o Python 3.x e o Pygame estão instalados.
 Você pode instalar o Pygame com o pip:
@@ -36,7 +36,7 @@ Você pode instalar o Pygame com o pip:
 pip install pygame
 ```
 
-## Estrutura do Projeto
+## 📂 Estrutura do Projeto
 
 ```
 /fuga_espacial
