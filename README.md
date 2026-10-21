@@ -19,10 +19,6 @@ Um grupo de diplomatas foge de uma fortaleza estelar a bordo de uma nave danific
 
 ## Como Jogar
 
-🕹️ [Clique aqui para jogar](COLE_AQUI_O_LINK_DO_JOGO)
-
-Ou
-
 1. Clone este repositório ou baixe o código-fonte.
 2. Acesse a pasta do projeto.
 3. Execute o arquivo main.py:
