@@ -64,6 +64,6 @@ pip install pygame
 └── README.md        # Documentação do projeto
 ```
 
-## Contribuindo
+## 🤝 Contribuindo
 
 Se quiser contribuir, fique à vontade para fazer um fork do repositório, realizar suas alterações e enviar um pull request.
